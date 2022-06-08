@@ -13,5 +13,8 @@ class MainApp : Application() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
         i("Hotel started")
+      hotels.add(HotelModel("One", "About one..."))
+        hotels.add(HotelModel("Two", "About two..."))
+        hotels.add(HotelModel("Three", "About three..."))
     }
 }

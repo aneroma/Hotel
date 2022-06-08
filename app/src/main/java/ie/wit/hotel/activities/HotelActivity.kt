@@ -13,7 +13,7 @@ class HotelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHotelBinding
     var hotel = HotelModel()
-    var app : MainApp? = null
+    lateinit var app : MainApp//? = null//reference to the MainApp object
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +26,7 @@ class HotelActivity : AppCompatActivity() {
 
         //i("Hotel Activity started...")
 
-        app = application as MainApp
+        app = application as MainApp//how it is initialised:
         i("Hotel Activity started...")
 
         binding.btnAdd.setOnClickListener() {
@@ -34,10 +34,10 @@ class HotelActivity : AppCompatActivity() {
             hotel.description = binding.description.text.toString()
             if (hotel.title.isNotEmpty()) {
                 //hotels.add(hotel)
-                app!!.hotels.add(hotel.copy())
+                app.hotels.add(hotel.copy())
                 i("add Button Pressed: ${hotel}")
-                for (i in  app!!.hotels.indices)
-                { i("Hotel[$i]:${this.app!!.hotels[i]}") }
+                for (i in  app.hotels.indices)
+                { i("Hotel[$i]:${app.hotels[i]}") }
             }
             else {
                 Snackbar.make(it,"Please Enter a title", Snackbar.LENGTH_LONG)
