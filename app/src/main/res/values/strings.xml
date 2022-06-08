@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Hotel</string>
+    <string name="button_addHotel">Add Hotel</string>
+    <string name="hint_hotelTitle">Hotel Title</string>
 </resources>
