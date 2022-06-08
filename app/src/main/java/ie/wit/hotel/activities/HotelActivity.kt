@@ -1,15 +1,17 @@
-package ie.wit.hotel
+package ie.wit.hotel.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import ie.wit.hotel.databinding.ActivityHotelBinding
+import ie.wit.hotel.models.HotelModel
 import timber.log.Timber
 import timber.log.Timber.i
 
 class HotelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHotelBinding
+    var hotel = HotelModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,9 +24,9 @@ class HotelActivity : AppCompatActivity() {
         i("Hotel Activity started...")
 
         binding.btnAdd.setOnClickListener() {
-            val hotelTitle = binding.hotelTitle.text.toString()
-            if (hotelTitle.isNotEmpty()) {
-                i("add Button Pressed: $hotelTitle")
+            hotel.title = binding.hotelTitle.text.toString()
+            if (hotel.title.isNotEmpty()) {
+                i("add Button Pressed: $hotel.title")
             } else {
                 Snackbar
                     .make(it, "Please Enter a title", Snackbar.LENGTH_LONG)
