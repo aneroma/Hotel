@@ -8,4 +8,5 @@
     <string name="enter_hotel_title"> Please enter a Hotel Title </string>
     <string name="save_hotel"> Save Hotel </string>
     <string name="button_addImage"> Add Image </string>
+    <string name="select_hotel_image">Select hotel image</string>
 </resources>
