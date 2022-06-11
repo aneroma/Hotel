@@ -3,4 +3,9 @@
     <string name="button_addHotel">Add Hotel</string>
     <string name="hint_hotelTitle">Hotel Title</string>
     <string name="hint_hotelDescription">Description </string>
+    <string name="menu_addHotel">Add</string>
+    <string name="menu_cancelHotel">Cancel</string>
+    <string name="enter_hotel_title"> Please enter a Hotel Title </string>
+    <string name="save_hotel"> Save Hotel </string>
+    <string name="button_addImage"> Add Image </string>
 </resources>
