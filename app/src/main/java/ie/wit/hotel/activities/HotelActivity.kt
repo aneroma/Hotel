@@ -1,6 +1,7 @@
 package ie.wit.hotel.activities
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -25,6 +26,8 @@ class HotelActivity : AppCompatActivity() {
     lateinit var app : MainApp//? = null//reference to the MainApp object
     private lateinit var imageIntentLauncher : ActivityResultLauncher<Intent>
     val IMAGE_REQUEST = 1
+    private lateinit var mapIntentLauncher : ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var edit = false
@@ -42,10 +45,16 @@ class HotelActivity : AppCompatActivity() {
             binding.hotelTitle.setText(hotel.title)
             binding.description.setText(hotel.description)
             binding.btnAdd.setText(R.string.save_hotel)
+            binding.hotelLocation.setOnClickListener {
+                i ("Set Location Pressed")
+            }
             binding.btnAdd.setText(R.string.save_hotel)
             Picasso.get()
                 .load(hotel.image)
                 .into(binding.hotelImage)
+            if (hotel.image != Uri.EMPTY) {
+                binding.chooseImage.setText(R.string.change_hotel_image)
+            }
         }
 
 
@@ -75,8 +84,15 @@ class HotelActivity : AppCompatActivity() {
         binding.chooseImage.setOnClickListener {
             showImagePicker(imageIntentLauncher)
         }
+        binding.hotelLocation.setOnClickListener {
+            val launcherIntent = Intent(this, MapActivity::class.java)
+            mapIntentLauncher.launch(launcherIntent)
+        }
         registerImagePickerCallback()
+        registerMapCallback()
     }
+
+
         override fun onCreateOptionsMenu(menu: Menu): Boolean {
             menuInflater.inflate(R.menu.menu_hotel, menu)
             return super.onCreateOptionsMenu(menu)
@@ -102,11 +118,18 @@ class HotelActivity : AppCompatActivity() {
                             Picasso.get()
                                 .load(hotel.image)
                                 .into(binding.hotelImage)
+                            binding.chooseImage.setText(R.string.change_hotel_image)
                         } // end of if
                     }
                     RESULT_CANCELED -> { } else -> { }
                 }
             }
        }
+
+    private fun registerMapCallback() {
+        mapIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { i("Map Loaded") }
+    }
     }
 
