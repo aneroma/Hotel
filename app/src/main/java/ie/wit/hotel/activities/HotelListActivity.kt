@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import ie.wit.hotel.R
 import ie.wit.hotel.adapters.HotelAdapter
@@ -17,8 +19,10 @@ import ie.wit.hotel.models.HotelModel
 
 
 class HotelListActivity : AppCompatActivity(), HotelListener {
+
     lateinit var app: MainApp
     private lateinit var binding: ActivityHotelListBinding
+    private lateinit var refreshIntentLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +35,13 @@ class HotelListActivity : AppCompatActivity(), HotelListener {
 
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = HotelAdapter(app.hotels.findAll(),this)
+        loadHotels()
+
+        registerRefreshCallback()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_hotel, menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -43,7 +49,8 @@ class HotelListActivity : AppCompatActivity(), HotelListener {
         when (item.itemId) {
             R.id.item_add -> {
                 val launcherIntent = Intent(this, HotelActivity::class.java)
-                startActivityForResult(launcherIntent,0)
+                //startActivityForResult(launcherIntent,0)
+                refreshIntentLauncher.launch(launcherIntent)
             }
         }
         return super.onOptionsItemSelected(item)
@@ -52,9 +59,31 @@ class HotelListActivity : AppCompatActivity(), HotelListener {
     override fun onHotelClick(hotel: HotelModel) {
         val launcherIntent = Intent(this, HotelActivity::class.java)
         launcherIntent.putExtra("hotel_edit", hotel)
-        startActivityForResult(launcherIntent,0)
+        //startActivityForResult(launcherIntent,0)
+        refreshIntentLauncher.launch(launcherIntent)
     }
+    private fun registerRefreshCallback() {
+        refreshIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { loadHotels() }
+    }
+    private fun loadHotels() {
+        showHotels(app.hotels.findAll())
+    }
+
+    fun showHotels (hotels: List<HotelModel>) {
+        binding.recyclerView.adapter = HotelAdapter(hotels, this)
+        binding.recyclerView.adapter?.notifyDataSetChanged()
+    }
+
 }
+
+
+    //override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+       //binding.recyclerView.adapter?.notifyDataSetChanged()
+        //super.onActivityResult(requestCode, resultCode, data)
+    //}
+//}
 
 //class HotelAdapter constructor(private var hotels: List<HotelModel>) :
     //RecyclerView.Adapter<HotelAdapter.MainHolder>() {
