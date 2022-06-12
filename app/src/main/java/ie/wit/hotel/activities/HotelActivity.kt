@@ -15,6 +15,7 @@ import ie.wit.hotel.databinding.ActivityHotelBinding
 import ie.wit.hotel.helpers.showImagePicker
 import ie.wit.hotel.main.MainApp
 import ie.wit.hotel.models.HotelModel
+import ie.wit.hotel.models.Location
 import timber.log.Timber
 import timber.log.Timber.i
 
@@ -22,32 +23,33 @@ class HotelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHotelBinding
     var hotel = HotelModel()
-
     lateinit var app : MainApp//? = null//reference to the MainApp object
     private lateinit var imageIntentLauncher : ActivityResultLauncher<Intent>
-    val IMAGE_REQUEST = 1
     private lateinit var mapIntentLauncher : ActivityResultLauncher<Intent>
+    //var location = Location(52.245696, -7.139102, 15f)
+
+    var edit = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var edit = false
+
+        edit = true
+
         binding = ActivityHotelBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.toolbarAdd.title = title
         setSupportActionBar(binding.toolbarAdd)
-        //Timber.plant(Timber.DebugTree())
-        i("Hotel Activity started...")
+
+
         app = application as MainApp//how it is initialised:
+
+        i("Hotel Activity started...")
 
         if (intent.hasExtra("hotel_edit")) {
             edit = true
             hotel = intent.extras?.getParcelable("hotel_edit")!!
             binding.hotelTitle.setText(hotel.title)
             binding.description.setText(hotel.description)
-            binding.btnAdd.setText(R.string.save_hotel)
-            binding.hotelLocation.setOnClickListener {
-                i ("Set Location Pressed")
-            }
             binding.btnAdd.setText(R.string.save_hotel)
             Picasso.get()
                 .load(hotel.image)
@@ -56,8 +58,6 @@ class HotelActivity : AppCompatActivity() {
                 binding.chooseImage.setText(R.string.change_hotel_image)
             }
         }
-
-
 
         binding.btnAdd.setOnClickListener() {
             hotel.title = binding.hotelTitle.text.toString()
@@ -74,9 +74,6 @@ class HotelActivity : AppCompatActivity() {
                 }
             }
              i("add Button Pressed: ${hotel}")
-            //for (i in app.hotels.indices) {
-            // i("Placemark[$i]:${this.app.hotels[i]}")
-            //}
             setResult(RESULT_OK)
             finish()
         }
@@ -84,8 +81,16 @@ class HotelActivity : AppCompatActivity() {
         binding.chooseImage.setOnClickListener {
             showImagePicker(imageIntentLauncher)
         }
+
         binding.hotelLocation.setOnClickListener {
+            val location = Location(52.245696, -7.139102, 15f)
+            if (hotel.zoom != 0f) {
+                location.lat =  hotel.lat
+                location.lng = hotel.lng
+                location.zoom = hotel.zoom
+            }
             val launcherIntent = Intent(this, MapActivity::class.java)
+                .putExtra("location", location)
             mapIntentLauncher.launch(launcherIntent)
         }
         registerImagePickerCallback()
@@ -95,11 +100,16 @@ class HotelActivity : AppCompatActivity() {
 
         override fun onCreateOptionsMenu(menu: Menu): Boolean {
             menuInflater.inflate(R.menu.menu_hotel, menu)
+            if (edit && menu != null) menu.getItem(0).setVisible(true)
             return super.onCreateOptionsMenu(menu)
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
             when (item.itemId) {
+                R.id.item_delete -> {
+                    app.hotels.delete(hotel)
+                    finish()
+                }
                 R.id.item_cancel -> {
                     finish()
                 }
@@ -129,7 +139,20 @@ class HotelActivity : AppCompatActivity() {
     private fun registerMapCallback() {
         mapIntentLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-            { i("Map Loaded") }
-    }
+            { result ->
+                when (result.resultCode) {
+                    RESULT_OK -> {
+                        if (result.data != null) {
+                            val location = result.data!!.extras?.getParcelable<Location>("location")!!
+                            i("Location == $location")
+                            hotel.lat = location.lat
+                            hotel.lng = location.lng
+                            hotel.zoom = location.zoom
+                        } // end of if
+                    }
+                    RESULT_CANCELED -> { } else -> { }
+                    }
+                }
+            }
     }
 
