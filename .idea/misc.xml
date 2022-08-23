@@ -3,9 +3,19 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/drawable/btn_primary.xml" value="0.15625" />
         <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/activity_hotel.xml" value="0.18" />
         <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/activity_hotel_list.xml" value="0.25" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/activity_hotel_maps.xml" value="0.14010416666666667" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/card_hotel.xml" value="0.2682291666666667" />
         <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/card_placemark.xml" value="0.14010416666666667" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/content_hotel_maps.xml" value="0.14010416666666667" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/fragment_first.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/fragment_second.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/layout/registration_activity.xml" value="0.1" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/menu/menu_edit_location.xml" value="0.1390625" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/menu/menu_main.xml" value="0.14010416666666667" />
+        <entry key="..\:/Users/diana/AndroidStudioProjects/Hotel/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.284375" />
       </map>
     </option>
   </component>

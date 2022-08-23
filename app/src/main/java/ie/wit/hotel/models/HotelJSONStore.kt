@@ -4,12 +4,11 @@ import android.content.Context
 import android.net.Uri
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
-import ie.wit.hotel.helpers.exists
-import ie.wit.hotel.helpers.read
-import ie.wit.hotel.helpers.write
+import ie.wit.hotel.helpers.*
 import timber.log.Timber
 import java.lang.reflect.Type
 import java.util.*
+
 
 const val JSON_FILE = "hotels.json"
 val gsonBuilder: Gson = GsonBuilder().setPrettyPrinting()
@@ -37,7 +36,7 @@ class HotelJSONStore(private val context: Context) : HotelStore {
     }
 
     override fun create(hotel: HotelModel) {
-       hotel.id = generateRandomId()
+        hotel.id = generateRandomId()
         hotels.add(hotel)
         serialize()
     }
@@ -57,10 +56,14 @@ class HotelJSONStore(private val context: Context) : HotelStore {
         serialize()
     }
     override fun delete(hotel:HotelModel) {
-        hotels.remove(hotel)
+        val foundHotel: HotelModel? = hotels.find { it.id == hotel.id }
+        hotels.remove(foundHotel)
         serialize()
     }
-
+    override fun findById(id:Long) : HotelModel? {
+        val foundHotel: HotelModel? = hotels.find { it.id == id }
+        return foundHotel
+    }
     private fun serialize() {
         val jsonString = gsonBuilder.toJson(hotels, listType)
         write(context, JSON_FILE, jsonString)
@@ -68,7 +71,7 @@ class HotelJSONStore(private val context: Context) : HotelStore {
 
     private fun deserialize() {
         val jsonString = read(context, JSON_FILE)
-       hotels = gsonBuilder.fromJson(jsonString, listType)
+        hotels = gsonBuilder.fromJson(jsonString, listType)
     }
 
     private fun logAll() {
@@ -76,7 +79,7 @@ class HotelJSONStore(private val context: Context) : HotelStore {
     }
 }
 
-class UriParser : JsonDeserializer<Uri>, JsonSerializer<Uri> {
+class UriParser : JsonDeserializer<Uri>,JsonSerializer<Uri> {
     override fun deserialize(
         json: JsonElement?,
         typeOfT: Type?,

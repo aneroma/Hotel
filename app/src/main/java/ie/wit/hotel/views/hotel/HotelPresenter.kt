@@ -1,34 +1,58 @@
 package ie.wit.hotel.views.hotel
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import ie.wit.hotel.databinding.ActivityHotelBinding
+import ie.wit.hotel.helpers.checkLocationPermissions
 import ie.wit.hotel.helpers.showImagePicker
 import ie.wit.hotel.main.MainApp
 import ie.wit.hotel.models.HotelModel
 import ie.wit.hotel.models.Location
+import ie.wit.hotel.views.location.EditLocationView
 import timber.log.Timber
 
 
 class HotelPresenter(private val view: HotelView) {
-
+    var map: GoogleMap? = null
     var hotel = HotelModel()
     var app: MainApp = view.application as MainApp
-    var binding: ActivityHotelBinding = ActivityHotelBinding.inflate(view.layoutInflater)
+    var locationService: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(view)
     private lateinit var imageIntentLauncher: ActivityResultLauncher<Intent>
     private lateinit var mapIntentLauncher: ActivityResultLauncher<Intent>
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     var edit = false;
+    private val location = Location(52.245696, -7.139102, 15f)
 
     init {
+
+        doPermissionLauncher()
+        registerImagePickerCallback()
+        registerMapCallback()
+
+
         if (view.intent.hasExtra("hotel_edit")) {
             edit = true
             hotel = view.intent.extras?.getParcelable("hotel_edit")!!
             view.showHotel(hotel)
         }
-        registerImagePickerCallback()
-        registerMapCallback()
+        else {
+
+            if (checkLocationPermissions(view)) {
+                doSetCurrentLocation()
+            }
+            hotel.lat = location.lat
+            hotel.lng = location.lng
+        }
+
     }
 
     fun doAddOrSave(title: String, description: String) {
@@ -60,7 +84,7 @@ class HotelPresenter(private val view: HotelView) {
     }
 
     fun doSetLocation() {
-        val location = Location(52.245696, -7.139102, 15f)
+
         if (hotel.zoom != 0f) {
             location.lat = hotel.lat
             location.lng = hotel.lng
@@ -71,9 +95,32 @@ class HotelPresenter(private val view: HotelView) {
         mapIntentLauncher.launch(launcherIntent)
     }
 
+    @SuppressLint("MissingPermission")
+    fun doSetCurrentLocation() {
+        Timber.i("setting location from doSetLocation")
+        locationService.lastLocation.addOnSuccessListener {
+            locationUpdate(it.latitude, it.longitude)
+        }
+    }
+
     fun cacheHotel(title: String, description: String) {
         hotel.title = title;
         hotel.description = description
+    }
+    fun doConfigureMap(m: GoogleMap) {
+        map = m
+        locationUpdate(hotel.lat, hotel.lng)
+    }
+    fun locationUpdate(lat: Double, lng: Double) {
+        hotel.lat = lat
+        hotel.lng = lng
+        hotel.zoom = 15f
+        map?.clear()
+        map?.uiSettings?.setZoomControlsEnabled(true)
+        val options = MarkerOptions().title(hotel.title).position(LatLng(hotel.lat, hotel.lng))
+        map?.addMarker(options)
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(hotel.lat, hotel.lng), hotel.zoom))
+        view.showHotel(hotel)
     }
 
     private fun registerImagePickerCallback() {
@@ -112,10 +159,21 @@ class HotelPresenter(private val view: HotelView) {
                             hotel.zoom = location.zoom
                         } // end of if
                     }
-                    AppCompatActivity.RESULT_CANCELED -> {}
-                }               else -> {}
+                    AppCompatActivity.RESULT_CANCELED -> {} else -> {}
                 }
 
             }
-
+    }
+    private fun doPermissionLauncher() {
+        Timber.i("permission check called")
+        requestPermissionLauncher =
+            view.registerForActivityResult(ActivityResultContracts.RequestPermission())
+            { isGranted: Boolean ->
+                if (isGranted) {
+                    doSetCurrentLocation()
+                } else {
+                    locationUpdate(location.lat, location.lng)
+                }
+            }
+    }
 }

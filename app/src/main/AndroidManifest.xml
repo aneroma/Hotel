@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ie.wit.hotel">
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".main.MainApp"
@@ -10,15 +12,35 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Hotel">
-        <activity android:name=".activities.HotelListActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".activities.HotelActivity">
-        </activity>
-    </application>
 
+        <activity android:name=".views.login.LoginView"
+        android:label="@string/title_activity_login"
+        android:launchMode="singleTop"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+
+        <activity
+            android:name=".views.map.HotelMapView"
+            android:exported="true"
+            android:label="@string/title_activity_hotel_maps"
+            android:theme="@style/Theme.Hotel.NoActionBar" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".views.location.EditLocationView"
+            android:exported="true"
+            android:label="@string/title_activity_map" />
+        <activity
+            android:name=".views.hotellist.HotelListView"
+            android:exported="true">
+        </activity>
+        <activity android:name=".views.hotel.HotelView" />
+    </application>
 </manifest>

@@ -13,4 +13,26 @@
     <string name="button_location">Set Location</string>
     <string name="title_activity_map">Map</string>
     <string name="menu_deleteHotel">Delete</string>
+    <string name="menu_saveHotel">Save</string>
+
+    <string name="title_activity_hotel_maps">Map of All Hotels </string>
+    <string name="title_activity_login"> Signup/Login to Hotel</string>
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="email" />
+    <string name="password" />
+    <string name="confirm_password" />
+    <string name="signed" />
+    <string name="already_have_an_account_login" />
+    <string name="login" />
+    <string name="don_t_have_an_account_sign_in" />
+    <string name="menu_mapMode" />
+
+
 </resources>
