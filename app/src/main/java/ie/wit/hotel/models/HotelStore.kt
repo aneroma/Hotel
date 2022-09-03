@@ -6,4 +6,5 @@ interface HotelStore {
     fun update(hotel: HotelModel)
     fun delete(hotel: HotelModel)
     fun findById(id:Long) : HotelModel?
+    fun clear()
 }

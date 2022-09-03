@@ -1,48 +1,59 @@
 package ie.wit.hotel.views.login
 
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+
 import com.google.firebase.auth.FirebaseAuth
-import ie.wit.hotel.views.hotellist.HotelListView
+import ie.wit.hotel.models.HotelFireStore
+import ie.wit.hotel.views.BasePresenter
+import ie.wit.hotel.views.BaseView
+import ie.wit.hotel.views.VIEW
+import org.jetbrains.anko.toast
 
-class LoginPresenter (val view: LoginView)  {
-    private lateinit var loginIntentLauncher : ActivityResultLauncher<Intent>
+class LoginPresenter (view: BaseView) : BasePresenter(view) {
 
-    init{
-        registerLoginCallback()
-    }
     var auth: FirebaseAuth = FirebaseAuth.getInstance()
+    var fireStore: HotelFireStore? = null
+
+    init {
+        if (app.hotels is HotelFireStore) {
+            fireStore = app.hotels as HotelFireStore
+        }
+    }
 
     fun doLogin(email: String, password: String) {
-        view.showProgress()
+        view?.showProgress()
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(view!!) { task ->
             if (task.isSuccessful) {
-                val launcherIntent = Intent(view, HotelListView::class.java)
-                loginIntentLauncher.launch(launcherIntent)
+                if (fireStore != null) {
+                    fireStore!!.fetchHotels {
+                        view?.hideProgress()
+                        view?.navigateTo(VIEW.LIST)
+                    }
+                } else {
+                    view?.hideProgress()
+                    view?.navigateTo(VIEW.LIST)
+                }
             } else {
-                view.showSnackBar("Login failed: ${task.exception?.message}")
+                view?.hideProgress()
+                view?.toast("Sign Up Failed: ${task.exception?.message}")
             }
-            view.hideProgress()
         }
-
     }
+
+//    fun googleSignIn() {
+//        app.googleSignInClient.signInIntent
+//        view?.navigateTo(VIEW.LIST)
+//    }
 
     fun doSignUp(email: String, password: String) {
-        view.showProgress()
+        view?.showProgress()
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(view!!) { task ->
             if (task.isSuccessful) {
-                val launcherIntent = Intent(view, HotelListView::class.java)
-                loginIntentLauncher.launch(launcherIntent)
+                view?.hideProgress()
+                view?.navigateTo(VIEW.LIST)
             } else {
-                view.showSnackBar("Login failed: ${task.exception?.message}")
+                view?.hideProgress()
+                view?.toast("Sign Up Failed: ${task.exception?.message}")
             }
-            view.hideProgress()
         }
-    }
-    private fun registerLoginCallback(){
-        loginIntentLauncher =
-            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-            {  }
     }
 }

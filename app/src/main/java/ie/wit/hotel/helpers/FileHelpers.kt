@@ -1,6 +1,7 @@
 package ie.wit.hotel.helpers
 
 import android.content.Context
+import android.util.Log
 import android.util.Log.e
 import java.io.*
 
@@ -10,7 +11,7 @@ fun write(context: Context, fileName: String, data: String) {
         outputStreamWriter.write(data)
         outputStreamWriter.close()
     } catch (e: Exception) {
-        e("Cannot read file: %s", e.toString());
+        Log.e("Error: ", "Cannot read file: " + e.toString());
     }
 }
 
@@ -24,7 +25,7 @@ fun read(context: Context, fileName: String): String {
             val partialStr = StringBuilder()
             var done = false
             while (!done) {
-                val line = bufferedReader.readLine()
+                var line = bufferedReader.readLine()
                 done = (line == null);
                 if (line != null) partialStr.append(line);
             }
@@ -32,9 +33,9 @@ fun read(context: Context, fileName: String): String {
             str = partialStr.toString()
         }
     } catch (e: FileNotFoundException) {
-        e("file not found: %s", e.toString());
+        Log.e("Error: ", "file not found: " + e.toString());
     } catch (e: IOException) {
-        e("cannot read file: %s", e.toString());
+        Log.e("Error: ", "cannot read file: " + e.toString());
     }
     return str
 }
@@ -42,4 +43,5 @@ fun read(context: Context, fileName: String): String {
 fun exists(context: Context, filename: String): Boolean {
     val file = context.getFileStreamPath(filename)
     return file.exists()
+
 }

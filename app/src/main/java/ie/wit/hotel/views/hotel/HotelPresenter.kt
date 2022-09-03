@@ -2,178 +2,187 @@ package ie.wit.hotel.views.hotel
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import ie.wit.hotel.databinding.ActivityHotelBinding
 import ie.wit.hotel.helpers.checkLocationPermissions
+import ie.wit.hotel.helpers.createDefaultLocationRequest
+import ie.wit.hotel.helpers.isPermissionGranted
 import ie.wit.hotel.helpers.showImagePicker
-import ie.wit.hotel.main.MainApp
 import ie.wit.hotel.models.HotelModel
 import ie.wit.hotel.models.Location
-import ie.wit.hotel.views.location.EditLocationView
-import timber.log.Timber
+import ie.wit.hotel.views.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 
-class HotelPresenter(private val view: HotelView) {
+class HotelPresenter (view: BaseView) : BasePresenter(view) {
+
     var map: GoogleMap? = null
+
     var hotel = HotelModel()
-    var app: MainApp = view.application as MainApp
-    var locationService: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(view)
-    private lateinit var imageIntentLauncher: ActivityResultLauncher<Intent>
-    private lateinit var mapIntentLauncher: ActivityResultLauncher<Intent>
-    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    var defaultLocation = Location(52.245696, -7.139102, 15f)
     var edit = false;
-    private val location = Location(52.245696, -7.139102, 15f)
+
+    var locationService: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(view)
+
+    val locationRequest = createDefaultLocationRequest()
+
+    val REQUEST_IMAGE_CAPTURE = 1
 
     init {
-
-        doPermissionLauncher()
-        registerImagePickerCallback()
-        registerMapCallback()
-
-
-        if (view.intent.hasExtra("hotel_edit")) {
+        if (view.intent.hasExtra("Hotel_edit")) {
             edit = true
-            hotel = view.intent.extras?.getParcelable("hotel_edit")!!
+            hotel= view.intent.extras?.getParcelable<HotelModel>("Hotel_edit")!!
             view.showHotel(hotel)
-        }
-        else {
-
+        } else {
             if (checkLocationPermissions(view)) {
                 doSetCurrentLocation()
             }
-            hotel.lat = location.lat
-            hotel.lng = location.lng
         }
-
-    }
-
-    fun doAddOrSave(title: String, description: String) {
-        hotel.title = title
-        hotel.description = description
-        if (edit) {
-            app.hotels.update(hotel)
-        } else {
-            app.hotels.create(hotel)
-        }
-
-        view.finish()
-
-    }
-
-    fun doCancel() {
-        view.finish()
-
-    }
-
-    fun doDelete() {
-        app.hotels.delete(hotel)
-        view.finish()
-
-    }
-
-    fun doSelectImage() {
-        showImagePicker(imageIntentLauncher)
-    }
-
-    fun doSetLocation() {
-
-        if (hotel.zoom != 0f) {
-            location.lat = hotel.lat
-            location.lng = hotel.lng
-            location.zoom = hotel.zoom
-        }
-        val launcherIntent = Intent(view, EditLocationView::class.java)
-            .putExtra("location", location)
-        mapIntentLauncher.launch(launcherIntent)
     }
 
     @SuppressLint("MissingPermission")
     fun doSetCurrentLocation() {
-        Timber.i("setting location from doSetLocation")
-        locationService.lastLocation.addOnSuccessListener {
-            locationUpdate(it.latitude, it.longitude)
+        var locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                if (locationResult != null && locationResult.locations != null) {
+                    val l = locationResult.locations.last()
+                    locationUpdate(Location(l.latitude, l.longitude))
+                }
+            }
+        }
+        if (!edit) {
+            locationService.requestLocationUpdates(locationRequest, locationCallback, null)
         }
     }
 
-    fun cacheHotel(title: String, description: String) {
-        hotel.title = title;
-        hotel.description = description
+    override fun doRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (isPermissionGranted(requestCode, grantResults)) {
+            doSetCurrentLocation()
+        } else {
+            locationUpdate(defaultLocation)
+        }
     }
+
     fun doConfigureMap(m: GoogleMap) {
         map = m
-        locationUpdate(hotel.lat, hotel.lng)
+        locationUpdate(hotel.location)
     }
-    fun locationUpdate(lat: Double, lng: Double) {
-        hotel.lat = lat
-        hotel.lng = lng
-        hotel.zoom = 15f
+
+    fun locationUpdate(location: Location) {
+        hotel.location = location
+        hotel.location.zoom = 15f
         map?.clear()
-        map?.uiSettings?.setZoomControlsEnabled(true)
-        val options = MarkerOptions().title(hotel.title).position(LatLng(hotel.lat, hotel.lng))
+        val options = MarkerOptions().title(hotel.name).position(LatLng(hotel.location.lat, hotel.location.lng))
         map?.addMarker(options)
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(hotel.lat, hotel.lng), hotel.zoom))
-        view.showHotel(hotel)
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(hotel.location.lat, hotel.location.lng), hotel.location.zoom))
+        view?.showLocation(hotel.location)
     }
 
-    private fun registerImagePickerCallback() {
 
-        imageIntentLauncher =
-            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-            { result ->
-                when (result.resultCode) {
-                    AppCompatActivity.RESULT_OK -> {
-                        if (result.data != null) {
-                            Timber.i("Got Result ${result.data!!.data}")
-                            hotel.image = result.data!!.data!!
-                            view.updateImage(hotel.image)
-                        }
-                    }
-                    AppCompatActivity.RESULT_CANCELED -> {}
-                    else -> {}
-                }
-
+    fun doAddOrSave(name: String, description: String, visitedDateL: String, visitedL: Boolean, favourite: Boolean, rating: Float) {
+        hotel.name = name
+        hotel.description = description
+        hotel.visitedDate = visitedDateL
+        hotel.visited = visitedL
+        hotel.favourite = favourite
+        hotel.rating = rating
+        doAsync {
+            if (edit) {
+                app.hotels.update(hotel)
+            } else {
+                app.hotels.create(hotel)
             }
+            uiThread {
+                view?.finish()
+            }
+        }
     }
 
-    private fun registerMapCallback() {
-        mapIntentLauncher =
-            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-            { result ->
-                when (result.resultCode) {
-                    AppCompatActivity.RESULT_OK -> {
-                        if (result.data != null) {
-                            Timber.i("Got Location ${result.data.toString()}")
-                            val location =
-                                result.data!!.extras?.getParcelable<Location>("location")!!
-                            Timber.i("Location == $location")
-                            hotel.lat = location.lat
-                            hotel.lng = location.lng
-                            hotel.zoom = location.zoom
-                        } // end of if
-                    }
-                    AppCompatActivity.RESULT_CANCELED -> {} else -> {}
-                }
+    fun doCancel() {
+        view?.finish()
+    }
 
-            }
+    fun doDelete() {
+        app.hotels.delete(hotel)
+        view?.finish()
     }
-    private fun doPermissionLauncher() {
-        Timber.i("permission check called")
-        requestPermissionLauncher =
-            view.registerForActivityResult(ActivityResultContracts.RequestPermission())
-            { isGranted: Boolean ->
-                if (isGranted) {
-                    doSetCurrentLocation()
-                } else {
-                    locationUpdate(location.lat, location.lng)
+
+    fun doSelectImage() {
+        view?.let {
+            showImagePicker(view!!, IMAGE_REQUEST)
+        }
+    }
+
+    fun doSetLocation() {
+        view?.navigateTo(
+            VIEW.LOCATION,
+            LOCATION_REQUEST,
+            "location",
+            Location(hotel.location.lat, hotel.location.lng, hotel.location.zoom)
+        )
+
+    }
+
+    override fun doActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        when (requestCode) {
+            IMAGE_REQUEST -> {
+                hotel.image = data.data.toString()
+                view?.showHotel(hotel)
+            }
+            LOCATION_REQUEST -> {
+                val location = data.extras?.getParcelable<Location>("location")!!
+                hotel.location = location
+                locationUpdate(location)
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun doResartLocationUpdates() {
+        var locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                if (locationResult != null && locationResult.locations != null) {
+                    val l = locationResult.locations.last()
+                    locationUpdate(Location(l.latitude, l.longitude))
                 }
             }
+        }
+        if (!edit) {
+            locationService.requestLocationUpdates(locationRequest, locationCallback, null)
+        }
     }
+
+    fun shareHotel(){
+        val details = "Checkout this Hotel" +
+                "\nName: ${hotel.name}" +
+                "\nDescription: ${hotel.description}" +
+                "\nRating: ${hotel.rating}" +
+                "\nLocation: ${hotel.location}"
+
+        val shareIntent = Intent()
+        shareIntent.action = Intent.ACTION_SEND
+        shareIntent.type="text/plain"
+        shareIntent.putExtra(Intent.EXTRA_TEXT, details);
+        view!!.startActivity(Intent.createChooser(shareIntent,"Share via"))
+    }
+
+
+
+
+
+
+
 }
+

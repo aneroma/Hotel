@@ -1,51 +1,62 @@
 package ie.wit.hotel.views.hotellist
 
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import ie.wit.hotel.main.MainApp
+
+import com.google.firebase.auth.FirebaseAuth
 import ie.wit.hotel.models.HotelModel
-import ie.wit.hotel.views.hotel.HotelView
-import ie.wit.hotel.views.map.HotelMapView
+import ie.wit.hotel.views.BasePresenter
+import ie.wit.hotel.views.BaseView
+import ie.wit.hotel.views.VIEW
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
-class HotelListPresenter(val view: HotelListView) {
-
-    var app: MainApp = view.application as MainApp
-    private lateinit var refreshIntentLauncher : ActivityResultLauncher<Intent>
-    private lateinit var editIntentLauncher : ActivityResultLauncher<Intent>
-    private lateinit var mapIntentLauncher : ActivityResultLauncher<Intent>
-
-    init {
-        registerEditCallback()
-        registerRefreshCallback()
-    }
-
-    fun getHotels() = app.hotels.findAll()
+class HotelListPresenter(view: BaseView) : BasePresenter(view) {
 
     fun doAddHotel() {
-        val launcherIntent = Intent(view, HotelView::class.java)
-        editIntentLauncher.launch(launcherIntent)
+        view?.navigateTo(VIEW.HOTEL)
     }
 
+
     fun doEditHotel(hotel: HotelModel) {
-        val launcherIntent = Intent(view, HotelView::class.java)
-        launcherIntent.putExtra("hotel_edit", hotel)
-        editIntentLauncher.launch(launcherIntent)
+        view?.navigateTo(VIEW.HOTEL, 0, "hotel_edit", hotel)
     }
 
     fun doShowHotelsMap() {
-        val launcherIntent = Intent(view, HotelMapView::class.java)
-        editIntentLauncher.launch(launcherIntent)
+        view?.navigateTo(VIEW.MAPS)
     }
-    private fun registerRefreshCallback() {
-        refreshIntentLauncher =
-            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-            { getHotels() }
+
+    /*
+    Load hotels based on what the switch icon being selected or not
+    if true show hotels which are favourites
+    If false show all hotelss
+     */
+    fun loadHotels(checked: Boolean, fav: Boolean) {
+        doAsync {
+            val hotels = app.hotels.findAll()
+            uiThread {
+                view?.showHotels(hotels)
+            }
+        }
     }
-    private fun registerEditCallback() {
-        editIntentLauncher =
-            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-            {  }
+
+
+    fun doLogout() {
+        FirebaseAuth.getInstance().signOut()
+        view?.navigateTo(VIEW.LOGIN)
+    }
+
+    fun doSettings() {
+        view?.navigateTo((VIEW.SETTINGS))
+    }
+
+    /*
+    Load hotels based on the users search criteria
+     */
+    fun loadHotelsSearch(containingString: String)
+    {
+        view?.showHotels(app.hotels.findAll().filter { it.name.toLowerCase().contains(containingString.toLowerCase()) })
+    }
+
+    fun loadHotels(fav: Boolean) {
 
     }
 }

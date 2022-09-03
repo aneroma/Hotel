@@ -1,38 +1,46 @@
 <resources>
-    <string name="app_name">Hotel</string>
+    <string name="app_name">Hotels</string>
+    <string name="Loading">Loading...</string>
     <string name="button_addHotel">Add Hotel</string>
-    <string name="hint_hotelTitle">Hotel Title</string>
-    <string name="hint_hotelDescription">Description </string>
+    <string name="hotelName">Hotel Name</string>
+    <string name="addHotel">Hotel</string>
+    <string name="hotelDescription">Hotel Description </string>
     <string name="menu_addHotel">Add</string>
     <string name="menu_cancelHotel">Cancel</string>
-    <string name="enter_hotel_title"> Please enter a Hotel Title </string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="enter_hotel_details"> Please enter a Hotel Name &amp; Description </string>
     <string name="save_hotel"> Save Hotel </string>
     <string name="button_addImage"> Add Image </string>
     <string name="select_hotel_image">Select hotel image</string>
     <string name="change_hotel_image">Change hotel image</string>
     <string name="button_location">Set Location</string>
-    <string name="title_activity_map">Map</string>
+    <string name="title_activity_hotel_maps">Map</string>
     <string name="menu_deleteHotel">Delete</string>
-    <string name="menu_saveHotel">Save</string>
-
-    <string name="title_activity_hotel_maps">Map of All Hotels </string>
-    <string name="title_activity_login"> Signup/Login to Hotel</string>
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-
-    <string name="email" />
-    <string name="password" />
-    <string name="confirm_password" />
-    <string name="signed" />
-    <string name="already_have_an_account_login" />
-    <string name="login" />
-    <string name="don_t_have_an_account_sign_in" />
-    <string name="menu_mapMode" />
-
+    <string name="notReg">Not Registered? Register here</string>
+    <string name="emailHint">Enter Email</string>
+    <string name="passwordHint">Enter password</string>
+    <string name="nameHint">Enter Name</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="Userdetails">Please enter email and password</string>
+    <string name="title_activity_test_nav">testNav</string>
+    <string name="settings">User Settings</string>
+    <string name="logout">Logout</string>
+    <string name="hint_visited">Have you visited this Hotel?</string>
+    <string name="hint_visitedDate">Enter Date you Visited</string>
+    <string name="check_title">Visited</string>
+    <string name="save_settings">Save</string>
+    <string name="user_settings">Settings</string>
+    <string name="all_maps">Map</string>
+    <string name="title_activity_hotel_all_maps">Map of all Hotels</string>
+    <string name="hotel_image_placeholder">Hotel Image</string>
+    <string name="hotel_name_placeholder">Hotel Name</string>
+    <string name="hotel_description_placeholder">Hotel Description</string>
+    <string name="menu_save_hotel">Save</string>
+    <string name="title_activity_hotel_list">Hotels</string>
+    <string name="title_activity_hotel">Hotels</string>
+    <string name="title_activity_edit_location">Hotels</string>
 
 </resources>

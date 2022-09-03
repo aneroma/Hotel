@@ -1,4 +1,4 @@
-package ie.wit.hotel.views.location
+package ie.wit.hotel.views.editLocation
 
 import android.app.Activity
 import android.content.Intent
@@ -8,42 +8,43 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import ie.wit.hotel.models.Location
+import ie.wit.hotel.views.BasePresenter
+import ie.wit.hotel.views.BaseView
 
-class EditLocationPresenter(val view: EditLocationView) {
+class EditLocationPresenter(view: BaseView) : BasePresenter(view) {
+
     var location = Location()
 
     init {
         location = view.intent.extras?.getParcelable<Location>("location")!!
     }
 
-    fun initMap(map: GoogleMap) {
+    fun doConfigureMap(map: GoogleMap) {
         val loc = LatLng(location.lat, location.lng)
         val options = MarkerOptions()
-            .title("Hotel")
-            .snippet("GPS : $loc")
+            .title("Ringfort")
+            .snippet("GPS : " + loc.toString())
             .draggable(true)
             .position(loc)
         map.addMarker(options)
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, location.zoom))
-        map.setOnMarkerDragListener(view)
-        map.setOnMarkerClickListener(view)
     }
 
-    fun doUpdateLocation(lat: Double, lng: Double, zoom: Float) {
+    fun doUpdateLocation(lat: Double, lng: Double) {
         location.lat = lat
         location.lng = lng
-        location.zoom = zoom
     }
 
-    fun doOnBackPressed() {
+    fun doSave() {
         val resultIntent = Intent()
         resultIntent.putExtra("location", location)
-        view.setResult(Activity.RESULT_OK, resultIntent)
-        view.finish()
+        view?.setResult(0, resultIntent)
+        view?.finish()
     }
 
     fun doUpdateMarker(marker: Marker) {
         val loc = LatLng(location.lat, location.lng)
-        marker.snippet = "GPS : $loc"
+        marker.setSnippet("GPS : " + loc.toString())
     }
+
 }

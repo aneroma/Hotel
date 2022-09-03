@@ -1,55 +1,72 @@
 package ie.wit.hotel.views.login
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log.i
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.snackbar.Snackbar
-import ie.wit.hotel.databinding.ActivityLoginBinding
+import ie.wit.hotel.R
+import ie.wit.hotel.views.BasePresenter
+import ie.wit.hotel.views.BaseView
+import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
-class LoginView : AppCompatActivity(){
+class LoginView : BaseView() {
+
     lateinit var presenter: LoginPresenter
-    private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        presenter = LoginPresenter( this)
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_login)
 
-        binding.progressBar.visibility = View.GONE
+        progressBar.visibility = View.GONE
 
-        binding.signUp.setOnClickListener {
-            val email = binding.email.text.toString()
-            val password = binding.password.text.toString()
-            if (email == "" || password == "") {
-                showSnackBar("please provide email and password")
+        info("Login activity started")
+
+        presenter = initPresenter(BasePresenter(this)) as LoginPresenter
+
+//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//            .requestIdToken(getString(R.string.default_web_client_id))
+//            .requestEmail()
+//            .build()
+//        // [END config_signin]
+//
+//        app.googleSignInClient = GoogleSignIn.getClient(this, gso)
+//
+//        googleSignInButton.setOnClickListener{
+//            presenter.googleSignIn()
+//        }
+
+        tvreg.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                startActivity(Intent(this@LoginView, RegisterView::class.java ))
+                info("Textview tvreg clicked\nRedirecting to register page")
+            }
+        })
+
+
+        btnLogin.setOnClickListener {
+
+            val passEmail = Lname.text.toString()
+            val passPassword = Lpassword.text.toString()
+
+            if (passEmail == "" || passPassword == "") {
+                toast("Please provide email + password")
             }
             else {
-                presenter.doSignUp(email,password)
+                presenter.doLogin(passEmail, passPassword)
             }
         }
 
-        binding.logIn.setOnClickListener {
-            val email = binding.email.text.toString()
-            val password = binding.password.text.toString()
-            if (email == "" || password == "") {
-                showSnackBar("please provide email and password")
-            }
-            else {
-                presenter.doLogin(email,password)
-            }
-        }
-    }
-    fun showSnackBar(message: CharSequence){
-        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
-            .show()
-    }
-    fun showProgress() {
-        binding.progressBar.visibility = View.VISIBLE
     }
 
-    fun hideProgress() {
-        binding.progressBar.visibility = View.GONE
+    override fun showProgress() {
+        progressBar.visibility = View.VISIBLE
     }
+
+    override fun hideProgress() {
+        progressBar.visibility = View.GONE
+    }
+
 }
